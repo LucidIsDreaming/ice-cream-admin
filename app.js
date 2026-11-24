@@ -1,9 +1,9 @@
 //Import import express from 'express';
 // Import required modules
+import session from 'express-session'
 import express from 'express';
 import mysql2 from 'mysql2';
 import dotenv from 'dotenv';
-import session from 'express-session';
 // Load the environment variables from .env file
 dotenv.config();
 
@@ -34,23 +34,27 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {maxAge: 1000 * 60 * 60}
+    cookie: {maxAge: 1000 * 60 *60} //1 hour
 }));
 
 const orders = [];
 
 // // Create a route to test the database
 
-// app.get('/db-test', async(req, res) => {
-//     try {
-//         const [orders] = await 
-//             pool.query('SELECT * FROM orders');
-//         res.send(orders);
-//     } catch(err) {
-//         console.error('Database error: ', err);
-//         res.status(500).send('Database error occurred.');
-//     }
-// });
+app.get('/session-test', (req, res) => {
+    req.session.views = (req.session.views || 0) + 1;
+    res.send(`Visits: ${req.session.views} <br>
+        Logged in : ${req.session.ooggedIn === true}`);
+});
+
+//Only let loged-in users through; send everyone else to /login
+function requireLogin(req,res, next){
+    if(req.session.loggedIn){
+        next();
+    }else{
+        res.redirect('/login');
+    }
+}
 
 
 
@@ -62,13 +66,6 @@ const orders = [];
 
 
 
-function requireLogin(req,res, next) {
-    if (req.session.loggedIn) {
-        next();
-    } else {
-        res.redirect('/login');
-    }
-}
 
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
@@ -148,6 +145,15 @@ app.post('/confirm', async(req, res) => {
 your order. Please try again.`);
     }
 });
+
+// req.session.destroy() deletes the session from the server.
+// When it's finished, we send the user back to the login page.
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
 
 // Display all orders
 app.get('/admin', requireLogin, async (req, res) => {
