@@ -155,6 +155,12 @@ app.get('/admin', requireLogin, async (req, res) => {
     }
 });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    })
+})
+
 // Start the server and listen on the specified port 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
