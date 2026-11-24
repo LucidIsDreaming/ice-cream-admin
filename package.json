@@ -13,7 +13,11 @@
   "dependencies": {
     "dotenv": "^18.0.10",
     "ejs": "^7.0.2",
+<<<<<<< HEAD
     "express": "^5.3.0",
+=======
+    "express": "^5.2.1",
+>>>>>>> 715ce0562bb9c8fc4707cb628644b0c829599148
     "express-session": "^1.19.0",
     "mysql2": "^3.24.6"
   }
