@@ -154,7 +154,7 @@ your order. Please try again.`);
 });
 
 // Display all orders
-app.get('/admin', async (req, res) => {
+app.get('/admin', requireLogin, async (req, res) => {
     try {
         // Fetch all orders from database, most recent first
         const [orders] = await pool.query(`SELECT * FROM orders ORDER BY timestamp DESC`);  
@@ -165,6 +165,12 @@ app.get('/admin', async (req, res) => {
         res.status(500).send('Error loading orders: ' + err.message);
     }
 });
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    })
+})
 
 // Start the server and listen on the specified port 
 app.listen(PORT, () => {
