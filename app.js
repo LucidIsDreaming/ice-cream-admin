@@ -39,13 +39,6 @@ app.use(session({
 
 const orders = [];
 
-// // Create a route to test the database
-
-app.get('/session-test', (req, res) => {
-    req.session.views = (req.session.views || 0) + 1;
-    res.send(`Visits: ${req.session.views} <br>
-        Logged in : ${req.session.ooggedIn === true}`);
-});
 
 //Only let loged-in users through; send everyone else to /login
 function requireLogin(req,res, next){
@@ -59,16 +52,6 @@ function requireLogin(req,res, next){
 
 
 
-
-// Define a default "route" ('/')
-// req: contains information about the incoming request
-// res: allows us to send back a response to the client
-
-app.get('/session-test', (req, res) => {
-    req.session.view = (req.session.views || 0) + 1;
-    res.send(`Visits: ${req.session.views})<br>
-        Logged in: ${req.session.loggedIn === true}`);
-});
 
 
 app.get('/login', (req, res) => {
