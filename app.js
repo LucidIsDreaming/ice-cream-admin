@@ -60,11 +60,7 @@ const orders = [];
 // req: contains information about the incoming request
 // res: allows us to send back a response to the client
 
-app.get('/session-test', (req, res) => {
-    req.session.view = (req.session.views || 0) + 1;
-    res.send(`Visits: ${req.session.views})<br>
-        Logged in: ${req.session.loggedIn === true}`);
-});
+
 
 function requireLogin(req,res, next) {
     if (req.session.loggedIn) {
