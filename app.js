@@ -3,6 +3,7 @@
 import express from 'express';
 import mysql2 from 'mysql2';
 import dotenv from 'dotenv';
+import session from 'express-session';
 // Load the environment variables from .env file
 dotenv.config();
 
@@ -29,6 +30,13 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended:true}));
 
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {maxAge: 1000 * 60 * 60}
+}));
+
 const orders = [];
 
 // // Create a route to test the database
@@ -51,6 +59,41 @@ const orders = [];
 // Define a default "route" ('/')
 // req: contains information about the incoming request
 // res: allows us to send back a response to the client
+
+app.get('/session-test', (req, res) => {
+    req.session.view = (req.session.views || 0) + 1;
+    res.send(`Visits: ${req.session.views})<br>
+        Logged in: ${req.session.loggedIn === true}`);
+});
+
+function requireLogin(req,res, next) {
+    if (req.session.loggedIn) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
+
+app.get('/login', (req, res) => {
+    res.render('login', { error: null });
+});
+
+app.post('/login', (req, res) => {
+ 
+    const username = req.body.username;
+    const password = req.body.password;
+ 
+   
+    if (username === process.env.ADMIN_USER &&
+        password === process.env.ADMIN_PASSWORD) {
+        req.session.loggedIn = true;
+        res.redirect('/admin');
+ 
+    } else {
+        res.render('login', { error: 'Invalid username or password.' });
+    }
+});
+
 app.get('/', (req, res) => {
 res.render(`home`)
 // res.send('hello');
