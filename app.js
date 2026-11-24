@@ -4,7 +4,6 @@ import session from 'express-session'
 import express from 'express';
 import mysql2 from 'mysql2';
 import dotenv from 'dotenv';
-import session from 'express-session';
 // Load the environment variables from .env file
 dotenv.config();
 
@@ -71,13 +70,6 @@ app.get('/session-test', (req, res) => {
         Logged in: ${req.session.loggedIn === true}`);
 });
 
-function requireLogin(req,res, next) {
-    if (req.session.loggedIn) {
-        next();
-    } else {
-        res.redirect('/login');
-    }
-}
 
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
@@ -158,8 +150,17 @@ your order. Please try again.`);
     }
 });
 
+// req.session.destroy() deletes the session from the server.
+// When it's finished, we send the user back to the login page.
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
+
 // Display all orders
-app.get('/admin', async (req, res) => {
+app.get('/admin', requireLogin, async (req, res) => {
     try {
         // Fetch all orders from database, most recent first
         const [orders] = await pool.query(`SELECT * FROM orders ORDER BY timestamp DESC`);  
