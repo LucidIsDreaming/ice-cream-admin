@@ -1,5 +1,6 @@
 //Import import express from 'express';
 // Import required modules
+import session from 'express-session'
 import express from 'express';
 import mysql2 from 'mysql2';
 import dotenv from 'dotenv';
@@ -29,20 +30,31 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended:true}));
 
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {maxAge: 1000 * 60 *60} //1 hour
+}));
+
 const orders = [];
 
 // // Create a route to test the database
 
-// app.get('/db-test', async(req, res) => {
-//     try {
-//         const [orders] = await 
-//             pool.query('SELECT * FROM orders');
-//         res.send(orders);
-//     } catch(err) {
-//         console.error('Database error: ', err);
-//         res.status(500).send('Database error occurred.');
-//     }
-// });
+app.get('/session-test', (req, res) => {
+    req.session.views = (req.session.views || 0) + 1;
+    res.send(`Visits: ${req.session.views} <br>
+        Logged in : ${req.session.ooggedIn === true}`);
+});
+
+//Only let loged-in users through; send everyone else to /login
+function requireLogin(req,res, next){
+    if(req.session.loggedIn){
+        next();
+    }else{
+        res.redirect('/login');
+    }
+}
 
 
 
